@@ -1,0 +1,38 @@
+import express from 'express';
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import {fileURLToPath} from 'node:url';
+import crypto from 'node:crypto';
+import {createConnections} from './connections.mjs';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const dir=process.env.FOLIO_DATA_DIR || path.join(root,'data');
+fs.mkdirSync(path.join(dir,'media'),{recursive:true});
+const dbPath=path.join(dir,'articles.json');
+let db=fs.existsSync(dbPath)?JSON.parse(fs.readFileSync(dbPath,'utf8')):{articles:[],defaultStyle:null};
+const save=()=>{fs.writeFileSync(dbPath+'.tmp',JSON.stringify(db));fs.renameSync(dbPath+'.tmp',dbPath)};
+const app=express(), host=process.env.FOLIO_HOST||'127.0.0.1', port=Number(process.env.PORT||4173);
+const secured=host!=='127.0.0.1';
+const codePath=path.join(dir,'access-code');
+const accessCode=fs.existsSync(codePath)?fs.readFileSync(codePath,'utf8').trim():crypto.randomBytes(6).toString('hex');
+if(!fs.existsSync(codePath))fs.writeFileSync(codePath,accessCode,{mode:0o600});
+const sessions=new Set();
+app.disable('x-powered-by');
+app.use((req,res,next)=>{res.set('X-Content-Type-Options','nosniff');res.set('Referrer-Policy','same-origin');if(req.method!=='GET'&&req.headers.origin){try{if(new URL(req.headers.origin).host!==req.headers.host)return res.status(403).json({error:'请求来源不匹配，请从简序页面操作'});}catch{return res.sendStatus(403)}}next()});
+app.use(express.json({limit:'100mb'}));
+const attempts=new Map();
+app.post('/api/login',(req,res)=>{const ip=req.ip, entry=attempts.get(ip)||{n:0,time:Date.now()};if(Date.now()-entry.time>60000){entry.n=0;entry.time=Date.now()}entry.n++;attempts.set(ip,entry);if(entry.n>15)return res.status(429).json({error:'尝试过多，请一分钟后重试'});if(req.body.code!==accessCode)return res.status(401).json({error:'访问码不正确，请查看电脑启动窗口'});const token=crypto.randomBytes(32).toString('hex');sessions.add(token);res.cookie('folio_session',token,{httpOnly:true,sameSite:'strict',maxAge:86400000});res.json({ok:true})});
+app.use(['/api','/media'],(req,res,next)=>{res.set('Cache-Control','no-store');if(!secured)return next();const token=(req.headers.cookie||'').split('; ').find(x=>x.startsWith('folio_session='))?.split('=')[1];if(!sessions.has(token))return res.status(401).json({error:'输入电脑启动窗口中的访问码，连接你的草稿'});next()});
+app.use('/api/connections',createConnections({dir}));
+app.get('/api/articles',(req,res)=>res.json({articles:db.articles.map(({blocks,...a})=>({...a,wordCount:blocks.filter(b=>b.html).map(b=>b.html.replace(/<[^>]+>/g,'')).join('').length})),defaultStyle:db.defaultStyle}));
+app.get('/api/articles/:id',(req,res)=>{const a=db.articles.find(a=>a.id===req.params.id);a?res.json(a):res.status(404).json({error:'找不到这篇文章'})});
+function valid(a){return a&&typeof a.title==='string'&&a.title.length<=500&&Array.isArray(a.blocks)&&a.blocks.length<=5000&&a.blocks.every(b=>b&&typeof b.id==='string'&&['paragraph','heading','subheading','quote','lead','list','divider','images'].includes(b.type)&&(!b.html||typeof b.html==='string')&&(b.type!=='images'||Array.isArray(b.images)))&&a.style&&typeof a.style==='object'}
+app.post('/api/articles',(req,res)=>{if(!valid(req.body))return res.status(400).json({error:'文章格式不正确，请检查导入文件'});const now=new Date().toISOString();const a={...req.body,id:crypto.randomUUID(),revision:1,createdAt:now,updatedAt:now};db.articles.unshift(a);save();res.status(201).json(a)});
+app.put('/api/articles/:id',(req,res)=>{const i=db.articles.findIndex(a=>a.id===req.params.id);if(i<0)return res.status(404).json({error:'文章已不存在，请另存副本'});if(req.body.revision!==db.articles[i].revision)return res.status(409).json({error:'另一台设备已修改这篇文章。请另存副本或载入最新版本。',current:db.articles[i]});if(!valid(req.body))return res.status(400).json({error:'文章格式不正确'});const a={...req.body,id:db.articles[i].id,createdAt:db.articles[i].createdAt,updatedAt:new Date().toISOString(),revision:db.articles[i].revision+1};db.articles[i]=a;save();res.json(a)});
+app.delete('/api/articles/:id',(req,res)=>{db.articles=db.articles.filter(a=>a.id!==req.params.id);save();res.json({ok:true})});
+app.put('/api/style',(req,res)=>{db.defaultStyle=req.body;save();res.json({ok:true})});
+app.post('/api/media',(req,res)=>{const {data,name}=req.body;const m=typeof data==='string'&&data.match(/^data:image\/(png|jpeg|gif|webp);base64,([A-Za-z0-9+/=\r\n]+)$/);if(!m)return res.status(400).json({error:'支持 JPG、PNG、GIF、WebP 图片'});const bytes=Buffer.from(m[2],'base64');if(bytes.length>12*1024*1024)return res.status(413).json({error:'单张图片请控制在 12 MB 以内'});const magic=m[1]==='png'?bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])):m[1]==='jpeg'?bytes[0]===255&&bytes[1]===216&&bytes[2]===255:m[1]==='gif'?bytes.subarray(0,3).toString()==='GIF':bytes.subarray(0,4).toString()==='RIFF'&&bytes.subarray(8,12).toString()==='WEBP';if(!magic)return res.status(400).json({error:'图片内容与格式不符'});const id=crypto.randomUUID(), file=id+'.'+m[1];fs.writeFileSync(path.join(dir,'media',file),bytes);res.status(201).json({id,src:'/media/'+file,name:String(name||'图片').slice(0,200),alt:'',caption:'',position:50,mime:'image/'+m[1]})});
+app.use('/media',express.static(path.join(dir,'media')));
+if(process.argv.includes('--dev')){const {createServer}=await import('vite');const vite=await createServer({root,server:{middlewareMode:true},appType:'spa'});app.use(vite.middlewares)}else{app.use(express.static(path.join(root,'dist')));app.get('/',(req,res)=>res.sendFile(path.join(root,'dist/index.html')))}
+app.use((err,req,res,next)=>{console.error(err.message);res.status(err.status||500).json({error:err.type==='entity.too.large'?'文件过大，请缩小后重试':'保存或读取失败，请检查磁盘空间后重试'})});
+app.listen(port,host,()=>{console.log(`\n简序 Folio  http://localhost:${port}\n数据目录：${dir}`);if(secured){console.log(`访问码：${accessCode}\n同一 Wi-Fi 下，手机浏览器打开：`);for(const list of Object.values(os.networkInterfaces()))for(const n of list||[])if(n.family==='IPv4'&&!n.internal)console.log(`http://${n.address}:${port}`);console.log('局域网连接使用 HTTP，仅供可信任的家庭/个人网络；请勿映射到公网。')}});
