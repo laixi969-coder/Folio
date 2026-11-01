@@ -27,3 +27,8 @@
 
 /* User-selected logo: show the original artwork within a compact navigation crop. */
 .brand .brand-image{position:relative;width:145px;height:67px;overflow:hidden;mix-blend-mode:multiply;flex:none}.brand .brand-image img{position:absolute;width:164%;max-width:none;height:auto;left:-32%;top:-38%}.editor-nav .brand-image{width:112px;height:52px}@media(max-width:767px){.home-nav .brand-image{width:120px;height:55px}.editor-nav .brand-image{width:86px;height:40px}}
+
+/* Editorial image arrangements retain each source image and its original order. */
+.layout-lead-pair,.layout-wide-left,.layout-wide-right{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.layout-lead-pair figure:first-child{grid-column:1/-1}.layout-wide-left{grid-template-columns:minmax(0,62fr) minmax(0,38fr)}.layout-wide-right{grid-template-columns:minmax(0,38fr) minmax(0,62fr)}.layout-inset figure{width:82%;margin:0 auto}.image-number{display:block;margin:0 0 8px;font:13px/1.4 Georgia,serif;color:var(--article-accent)}
+
+.layout-wide-left figure:last-child:nth-child(odd),.layout-wide-right figure:last-child:nth-child(odd),.layout-lead-pair figure:last-child:nth-child(even){grid-column:1/-1}
