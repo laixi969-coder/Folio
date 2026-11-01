@@ -22,8 +22,9 @@
 #article{--paper:#FAF8F2;--ink:#282D2A;--muted:#66716B;--accent:#426B64;--tint:#E9EEEA;--rule:#CFD8D1;--on-accent:#FFFFFF;color:var(--ink)}
 .edition{background:transparent;color:var(--muted);padding:0 0 12px;border:0;border-bottom:1px solid var(--rule)}.edition strong{color:var(--accent)}.edition strong:before{background:var(--accent)}.prologue{background:var(--tint)}.prologue .quote-mark,.prologue .close-quote{color:var(--accent)}.feature-plate .feature-caption{color:var(--on-accent)}.highlight{background:none;box-shadow:inset 0 -.35em var(--tint)}
 @media print{.sample-series{display:none}}
+.viewer .brand-image{position:relative;width:124px;height:57px;overflow:hidden;mix-blend-mode:multiply}.viewer .brand-image img{position:absolute;width:164%;max-width:none;height:auto;left:-32%;top:-38%}@media(max-width:480px){.viewer .brand-image{width:100px;height:46px}}
 </style><link rel="stylesheet" href="../heading-series.css"/></head>
-<body><a class="skip" href="#article">跳到文章</a><nav class="viewer"><a class="brand" href="/">简序 <span>FOLIO</span></a><span>杂志 · 长文 · 默认风格</span><button onclick="window.print()">打印 / 存为 PDF</button></nav>
+<body><a class="skip" href="#article">跳到文章</a><nav class="viewer"><a class="brand" href="/" aria-label="简序 FOLIO"><div class="brand-image"><img src="../brand/folio-logo.png" alt=""></div></a><span>杂志 · 长文 · 默认风格</span><button onclick="window.print()">打印 / 存为 PDF</button></nav>
 <div id="article-series-picker" class="sample-series"></div>
 <details class="sample-series series-customize"><summary>单独调整配色与标题排法</summary><div id="article-palette-picker"></div><div id="heading-series-picker"></div></details>
 <main id="article">

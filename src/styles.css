@@ -24,3 +24,6 @@
 .home>.list-heading{background:transparent;color:var(--ink);padding:18px 0;border:0;border-bottom:1px solid var(--line)}.home>.list-heading .muted,.home>.list-heading h2 span{color:var(--muted)}
 .paper.magazine-default{background:var(--article-paper);color:var(--mag-ink)}.paper.magazine-default h1,.paper.magazine-default strong,.paper.magazine-default b{color:var(--mag-ink)}.magazine-default .block-lead:before,.magazine-default .block-lead:after{color:var(--article-accent)}.magazine-default figcaption.feature-caption{color:var(--article-on-accent)}.brand span{text-transform:uppercase}
 .magazine-default .feature-caption strong{color:var(--article-on-accent)}
+
+/* User-selected logo: show the original artwork within a compact navigation crop. */
+.brand .brand-image{position:relative;width:145px;height:67px;overflow:hidden;mix-blend-mode:multiply;flex:none}.brand .brand-image img{position:absolute;width:164%;max-width:none;height:auto;left:-32%;top:-38%}.editor-nav .brand-image{width:112px;height:52px}@media(max-width:767px){.home-nav .brand-image{width:120px;height:55px}.editor-nav .brand-image{width:86px;height:40px}}
