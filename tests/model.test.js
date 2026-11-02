@@ -32,3 +32,16 @@ describe('已确认的杂志默认',()=>{
  it('杂志自动排图保留原图与已有图注，不编写新文案',async()=>{const{autoLayout}=await import('../src/model');const pair=imageBlock([{id:'a',src:'/media/a.png'},{id:'b',src:'/media/b.png'}]);const feature={...imageBlock([{id:'c',src:'/media/c.png'}]),caption:'用户自己的图注'};const a=autoLayout({...newArticle(),blocks:[pair,feature]});expect(a.blocks[0].treatment).toBe('plain');expect(a.blocks[0].ratio).toBe('original');expect(a.blocks[1].treatment).toBe('feature');expect(exportHTML(a)).toContain('用户自己的图注');expect(exportHTML(a)).toContain('background:#426B64');expect(a.blocks[1].images).toHaveLength(1)});
  it('旧稿排版可保留经典样式，不强改为杂志',()=>{expect(normalizeStyle({sidePadding:20,fontSize:16})).toMatchObject({preset:'classic',sidePadding:20})})
 });
+
+describe('Markdown 结构导入',()=>{
+ it('保留表格、代码和图片位置，导出时转义代码与保留表格',()=>{
+  const blocks=parseMarkdown('开头\n\n| 名称 | 数量 |\n| --- | --- |\n| **苹果** | 2 |\n\n```js\nif (a < b) {\n  alert("x")\n}\n```\n\n图前 ![说明](photo.png) 图后');
+  expect(blocks.map(b=>b.markdownKind||b.markdownImage?'special':b.type)).toEqual(['paragraph','special','special','paragraph','special','paragraph']);
+  expect(blocks[1].html).toContain('<table>');
+  expect(blocks[1].html).toContain('<strong>苹果</strong>');
+  expect(blocks[2].html).toContain('a &lt; b');
+  expect(blocks[4].markdownImage).toEqual({src:'photo.png',alt:'说明'});
+  const html=exportHTML({...newArticle(),blocks:blocks.slice(0,3)});
+  expect(html).toContain('<table style=');expect(html).toContain('<pre style=');expect(html).toContain('a &lt; b');
+ });
+});

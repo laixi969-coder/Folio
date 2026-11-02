@@ -8,18 +8,24 @@ it('导入 Markdown 新建文章并可插入现有文章，空文件不修改内
  let created;
  global.fetch=vi.fn(async(url,options)=>{
   if(url==='/api/articles'&&!options?.method)return {ok:true,json:async()=>({articles:[],defaultStyle:null})};
+  if(url==='/api/media')return {ok:true,json:async()=>({id:'img',src:'/media/img.png',name:'图片',alt:'',caption:'',position:50})};
   if(url==='/api/articles'&&options?.method==='POST'){created=JSON.parse(options.body);return {ok:true,json:async()=>({...created,id:'md-article',revision:1})}};
   throw Error('unexpected '+url);
  });
  await import('../src/main.jsx');
  await screen.findByText('第一篇文章，从这里开始。');
- const fileInput=document.querySelector('input[accept=".docx,.md"]');
- const file={name:'原稿.MD',size:100,text:async()=> '\ufeff# 文章标题\n正文 **重点**\n## 章节\n> 引用'};
- fireEvent.change(fileInput,{target:{files:[file]}});
+ const fileInput=document.querySelector('input[accept^=".docx,.md"]');
+ const file={name:'原稿.MD',size:100,text:async()=> '\ufeff# 文章标题\n正文 **重点**\n## 章节\n> 引用\n\n![配图](photo.png)\n\n| A | B |\n|---|---|\n| 1 | 2 |\n\n```js\nconst x = 1;\n```'};
+ const photo=new File(['png'], 'photo.png',{type:'image/png'});
+ fireEvent.change(fileInput,{target:{files:[file,photo]}});
  await screen.findByText('排版效果');
  expect(created.title).toBe('文章标题');
- expect(created.blocks.map(b=>b.type)).toEqual(['lead','heading','quote']);
+ expect(created.blocks.map(b=>b.type)).toEqual(['lead','heading','quote','images','paragraph','paragraph']);
  expect(created.blocks[0].html).toContain('<strong>重点</strong>');
+ expect(created.blocks[3].images[0]).toMatchObject({src:'/media/img.png',alt:'配图'});
+ expect(created.blocks[4].html).toContain('<table>');
+ expect(created.blocks[5].html).toContain('<pre><code>');
+ expect(document.querySelector('.paper img').getAttribute('src')).toBe('/media/img.png');
  fireEvent.click(screen.getByText('继续微调'));
  fireEvent.click(screen.getByRole('button',{name:'插入'}));
  fireEvent.change(fileInput,{target:{files:[{name:'追加.md',size:20,text:async()=> '追加段落'}]}});
@@ -29,5 +35,8 @@ it('导入 Markdown 新建文章并可插入现有文章，空文件不修改内
  fireEvent.click(screen.getByRole('button',{name:'插入'}));
  fireEvent.change(fileInput,{target:{files:[{name:'空.md',size:0,text:async()=> '  \n'}]}});
  await waitFor(()=>expect(screen.getByRole('alert').textContent).toContain('没有找到可导入的文字'));
+ expect(screen.getByRole('dialog')).toBeTruthy();
+ fireEvent.change(fileInput,{target:{files:[{name:'缺图.md',size:30,text:async()=> '![缺图](missing.png)'}]}});
+ await waitFor(()=>expect(screen.getByRole('alert').textContent).toContain('请与 Markdown 文件一起选择该图片'));
  expect(screen.getByRole('dialog')).toBeTruthy();
 });

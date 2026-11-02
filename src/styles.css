@@ -38,3 +38,10 @@
 .article-block.block-images:has(.image-export-preview){margin:0}.image-export-preview img{max-width:100%}.image-export-preview table{border:0}
 
 .article-block.block-heading:has(.designed-heading){display:block;margin:0;padding:0;border:0;letter-spacing:normal}.designed-heading h2{letter-spacing:inherit}.designed-heading [contenteditable]{min-height:1.6em}
+
+/* Markdown 表格与代码保留结构，并允许在窄屏横向查看。 */
+.article-block:has(table), .article-block:has(pre) { overflow-x: auto; }
+.article-block table { border-collapse: collapse; width: 100%; }
+.article-block th, .article-block td { border: 1px solid #d5dad7; padding: 8px 12px; min-width: 70px; }
+.article-block th { background: #eef2ef; text-align: left; }
+.article-block pre { white-space: pre; overflow-x: auto; padding: 16px; background: #f2f4f2; font: 14px/1.6 monospace; }
