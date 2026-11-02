@@ -36,3 +36,5 @@
 
 /* 图片预览直接使用公众号正文的布局与间距。 */
 .article-block.block-images:has(.image-export-preview){margin:0}.image-export-preview img{max-width:100%}.image-export-preview table{border:0}
+
+.article-block.block-heading:has(.designed-heading){display:block;margin:0;padding:0;border:0;letter-spacing:normal}.designed-heading h2{letter-spacing:inherit}.designed-heading [contenteditable]{min-height:1.6em}
