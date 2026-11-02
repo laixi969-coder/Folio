@@ -12,6 +12,7 @@ describe('导出检查',()=>{
   expect(result.issues.find(i=>i.level==='blocking')).toMatchObject({blockId:group.id,message:'第 1 组第 2 张图片无法读取，请重新上传。'});
   expect(result.assets['/media/a.png']).toBe('data:image/png;base64,eA==');
  });
+ it('检查并嵌入表格里的图片',async()=>{const block={id:'table',type:'paragraph',markdownKind:'table',html:'<table><tbody><tr><td><img src="/media/table.png" alt="图"></td></tr></tbody></table>'};const result=await prepareExport({...newArticle(),blocks:[block]},async()=>({ok:true,blob:async()=>new Blob(['x'],{type:'image/png'})}),async()=>'data:image/png;base64,eA==');expect(result.issues).toEqual([]);expect(result.assets['/media/table.png']).toBe('data:image/png;base64,eA==');const failed=await prepareExport({...newArticle(),blocks:[block]},async()=>({ok:false}),vi.fn());expect(failed.issues[0]).toMatchObject({level:'blocking',blockId:'table'})});
  it('正文为空时阻止复制',async()=>{const result=await prepareExport(newArticle(),vi.fn(),vi.fn());expect(result.issues[0].level).toBe('blocking')});
  it('剪贴板 API 失败时使用复制事件写入两种格式',async()=>{
   const data={};const listener={clipboardData:{setData:(type,value)=>data[type]=value},preventDefault(){}};

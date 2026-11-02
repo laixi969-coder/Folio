@@ -1,17 +1,17 @@
-import { safeSrc, textOf } from './model';
+import { safeSrc, textOf, embeddedImageSources } from './model';
 
 export async function prepareExport(article, fetchImage = fetch, readImage) {
   const assets = {}, issues = [];
-  if (!article.blocks.some(b => b.type === 'images' ? b.images?.length : b.html && textOf(b.html).trim())) {
+  if (!article.blocks.some(b => b.type === 'images' ? b.images?.length : b.html && (textOf(b.html).trim() || embeddedImageSources(b.html).length))) {
     issues.push({ level: 'blocking', message: '正文为空，请先添加内容。' });
   }
   let group = 0;
   for (const block of article.blocks) {
-    if (block.type !== 'images') continue;
+    if (block.type !== 'images' && !embeddedImageSources(block.html).length) continue;
     group++;
     if (block.layout === 'horizontal') issues.push({ level: 'warning', blockId: block.id, message: `第 ${group} 组图片：公众号正文会从横向滑动改为纵向排列。` });
     if (block.ratio && block.ratio !== 'original') issues.push({ level: 'warning', blockId: block.id, message: `第 ${group} 组图片：已输出裁切样式，公众号是否保留需粘贴后检查。` });
-    for (const [index, image] of (block.images || []).entries()) {
+    for (const [index, image] of (block.type === 'images' ? (block.images || []) : embeddedImageSources(block.html).map(src=>({src}))).entries()) {
       const label = `第 ${group} 组第 ${index + 1} 张图片`;
       try {
         if (!safeSrc(image.src)) throw new Error('invalid source');

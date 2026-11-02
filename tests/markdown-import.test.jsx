@@ -8,6 +8,7 @@ it('导入 Markdown 新建文章并可插入现有文章，空文件不修改内
  let created;
  global.fetch=vi.fn(async(url,options)=>{
   if(url==='/api/articles'&&!options?.method)return {ok:true,json:async()=>({articles:[],defaultStyle:null})};
+  if(url==='/media/img.png')return {ok:true,blob:async()=>new Blob(['png'],{type:'image/png'})};
   if(url==='/api/media')return {ok:true,json:async()=>({id:'img',src:'/media/img.png',name:'图片',alt:'',caption:'',position:50})};
   if(url==='/api/articles'&&options?.method==='POST'){created=JSON.parse(options.body);return {ok:true,json:async()=>({...created,id:'md-article',revision:1})}};
   throw Error('unexpected '+url);
@@ -15,7 +16,7 @@ it('导入 Markdown 新建文章并可插入现有文章，空文件不修改内
  await import('../src/main.jsx');
  await screen.findByText('第一篇文章，从这里开始。');
  const fileInput=document.querySelector('input[accept^=".docx,.md"]');
- const file={name:'原稿.MD',size:100,text:async()=> '\ufeff# 文章标题\n正文 **重点**\n## 章节\n> 引用\n\n![配图](photo.png)\n\n| A | B |\n|---|---|\n| 1 | 2 |\n\n```js\nconst x = 1;\n```'};
+ const file={name:'原稿.MD',size:100,text:async()=> '\ufeff# 文章标题\n正文 **重点**\n## 章节\n> 引用\n\n![配图](photo.png)\n\n| A | B |\n|---|---|\n| 1 | ![表格图片](photo.png) |\n\n```js\nconst x = 1;\n```'};
  const photo=new File(['png'], 'photo.png',{type:'image/png'});
  fireEvent.change(fileInput,{target:{files:[file,photo]}});
  await screen.findByText('排版效果');
@@ -24,8 +25,27 @@ it('导入 Markdown 新建文章并可插入现有文章，空文件不修改内
  expect(created.blocks[0].html).toContain('<strong>重点</strong>');
  expect(created.blocks[3].images[0]).toMatchObject({src:'/media/img.png',alt:'配图'});
  expect(created.blocks[4].html).toContain('<table>');
+ expect(created.blocks[4].html).toContain('src="/media/img.png"');
+ expect(document.querySelector('.paper td img').getAttribute('alt')).toBe('表格图片');
  expect(created.blocks[5].html).toContain('<pre><code>');
  expect(document.querySelector('.paper img').getAttribute('src')).toBe('/media/img.png');
+ expect(document.querySelector('.paper pre').textContent).toBe('const x = 1;');
+ let downloaded;URL.createObjectURL=vi.fn(blob=>{downloaded=blob;return 'blob:test'});URL.revokeObjectURL=vi.fn();vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(()=>{});
+ fireEvent.click(screen.getByText('满意，去导出'));
+ await screen.findByText('正文和图片检查完成。');
+ fireEvent.click(screen.getByRole('button',{name:/下载兼容 HTML/}));
+ await waitFor(()=>expect(downloaded).toBeTruthy());
+ const readBlob=blob=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsText(blob)});
+ const exported=new DOMParser().parseFromString(await readBlob(downloaded),'text/html');
+ expect(exported.querySelectorAll('img')).toHaveLength(2);
+ for(const img of exported.querySelectorAll('img'))expect(img.getAttribute('src')).toMatch(/^data:image\/png;base64,/);
+ expect(exported.querySelector('table td img').getAttribute('alt')).toBe('表格图片');
+ expect(exported.querySelector('pre').textContent).toBe('const x = 1;');
+ downloaded=null;fireEvent.click(screen.getByRole('button',{name:/备份可编辑原稿/}));
+ await waitFor(()=>expect(downloaded).toBeTruthy());
+ const backup=JSON.parse(await readBlob(downloaded));
+ expect(backup.article.blocks[4].html).toContain('data:image/png;base64,');
+ fireEvent.click(screen.getByRole('button',{name:'关闭弹窗'}));
  fireEvent.click(screen.getByText('继续微调'));
  fireEvent.click(screen.getByRole('button',{name:'插入'}));
  fireEvent.change(fileInput,{target:{files:[{name:'追加.md',size:20,text:async()=> '追加段落'}]}});

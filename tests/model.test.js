@@ -45,3 +45,20 @@ describe('Markdown 结构导入',()=>{
   expect(html).toContain('<table style=');expect(html).toContain('<pre style=');expect(html).toContain('a &lt; b');
  });
 });
+
+
+it('嵌套图片、引用图片和表格对齐不会丢失',()=>{
+ const blocks=parseMarkdown('- ![列表图片](a.png)\n- 内容\n\n> ![引用图片](b.png)\n\n[![链接图片](c.png)](https://example.com)\n\n![引用式图片][photo]\n\n[photo]: d.png\n\n| 左 | 右 |\n| :--- | ---: |\n| 正文 | ![单元格](e.png) |');
+ expect(blocks.filter(b=>b.markdownImage).map(b=>b.markdownImage.src)).toEqual(['a.png','b.png','c.png','d.png']);
+ expect(blocks.some(b=>b.html.includes('[photo]:'))).toBe(false);
+ const table=blocks.find(b=>b.markdownKind==='table');
+ expect(table.markdownImages[0]).toMatchObject({src:'e.png',alt:'单元格'});
+ expect(table.html).toContain('align="right"');
+});
+it('表格图片导出时嵌入资源且过滤危险地址',()=>{
+ const blocks=[{id:'t',type:'paragraph',markdownKind:'table',html:'<table><tbody><tr><td align="right"><img src="/media/a.png" alt="图"></td></tr></tbody></table>'}];
+ const data='data:image/png;base64,eA==';const html=exportHTML({...newArticle(),blocks},{assets:{'/media/a.png':data}});
+ expect(html).toContain('src="'+data+'"');expect(html).toContain('text-align:right');
+ expect(clean('<img src="https://evil.test/x"><img src="javascript:alert(1)">')).toBe('');
+});
+it('首个代码块不会被误认为文章标题',async()=>{const {autoLayout}=await import('../src/model');const a=autoLayout({...newArticle(),blocks:parseMarkdown('```\n标题：这是一行代码\n```')});expect(a.title).toBe('');expect(a.blocks[0].html).toContain('标题：这是一行代码')});
