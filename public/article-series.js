@@ -1,5 +1,5 @@
 import{ARTICLE_PALETTES,articlePalette,applyArticlePalette}from'./article-palettes.js';
-import{HEADING_SERIES,normalizeSeries}from'./heading-series.js';
+import{HEADING_SERIES,SELECTABLE_HEADING_SERIES,normalizeSeries}from'./heading-series.js';
 // An article uses one combination throughout. Individual adjustments remain possible.
 export const ARTICLE_SERIES=[
  {id:'celadon-editorial',name:'青瓷章序',paletteId:'celadon',headingSeries:'editorial',description:'青绿纸白 · 大号章序'},
@@ -14,11 +14,12 @@ export const ARTICLE_SERIES=[
  {id:'olive-frame',name:'苔绿边框',paletteId:'olive',headingSeries:'frame',description:'苔绿细绢 · 留白边框'},
  {id:'berry-dot',name:'绛紫小点',paletteId:'berry',headingSeries:'dot',description:'绛紫香灰 · 小圆点'}
 ];
+export const SELECTABLE_ARTICLE_SERIES=ARTICLE_SERIES.filter(s=>SELECTABLE_HEADING_SERIES.some(h=>h.id===s.headingSeries));
 export function currentArticleSeries(style={}){
  const p=articlePalette(style),base=ARTICLE_PALETTES.find(x=>x.id===p.id);
  if(p.accent.toLowerCase()!==base.accent.toLowerCase())return null;
  return ARTICLE_SERIES.find(s=>s.paletteId===p.id&&s.headingSeries===normalizeSeries(style.headingSeries))||null;
 }
 export function applyArticleSeries(style,id){const series=ARTICLE_SERIES.find(s=>s.id===id);if(!series)return {...style};return {...applyArticlePalette(style,series.paletteId),headingSeries:series.headingSeries};}
-export function randomArticleSeries(style,random=Math.random){const current=currentArticleSeries(style),options=ARTICLE_SERIES.filter(s=>s.id!==current?.id);return options[Math.min(options.length-1,Math.max(0,Math.floor(random()*options.length)))].id;}
+export function randomArticleSeries(style,random=Math.random){const current=currentArticleSeries(style),options=SELECTABLE_ARTICLE_SERIES.filter(s=>s.id!==current?.id);return options[Math.min(options.length-1,Math.max(0,Math.floor(random()*options.length)))].id;}
 export function articleSeriesPreview(series){const palette=ARTICLE_PALETTES.find(p=>p.id===series.paletteId),heading=HEADING_SERIES.find(h=>h.id===series.headingSeries);return{palette,heading};}

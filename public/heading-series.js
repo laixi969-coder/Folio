@@ -11,8 +11,9 @@ export const HEADING_SERIES=[
  {id:'frame',name:'留白边框',description:'细边框围合章节'},
  {id:'dot',name:'小圆点',description:'圆点和短编号轻巧引导'}
 ];
+export const SELECTABLE_HEADING_SERIES=HEADING_SERIES.filter(s=>!['rule','label','underline','dot'].includes(s.id));
 export const normalizeSeries=id=>HEADING_SERIES.some(s=>s.id===id)?id:'editorial';
-export function randomSeries(current,random=Math.random){const ids=HEADING_SERIES.map(s=>s.id).filter(id=>id!==normalizeSeries(current));return ids[Math.min(ids.length-1,Math.max(0,Math.floor(random()*ids.length)))];}
+export function randomSeries(current,random=Math.random){const ids=SELECTABLE_HEADING_SERIES.map(s=>s.id).filter(id=>id!==normalizeSeries(current));return ids[Math.min(ids.length-1,Math.max(0,Math.floor(random()*ids.length)))];}
 export const styleText=obj=>Object.entries(obj).map(([k,v])=>k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())+':'+v).join(';')+';';
 export function headingSeriesStyles(s={}){
  const id=normalizeSeries(s.headingSeries),p=articlePalette(s),color=p.accent;

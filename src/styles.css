@@ -32,3 +32,7 @@
 .layout-lead-pair,.layout-wide-left,.layout-wide-right{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.layout-lead-pair figure:first-child{grid-column:1/-1}.layout-wide-left{grid-template-columns:minmax(0,62fr) minmax(0,38fr)}.layout-wide-right{grid-template-columns:minmax(0,38fr) minmax(0,62fr)}.layout-inset figure{width:82%;margin:0 auto}.image-number{display:block;margin:0 0 8px;font:13px/1.4 Georgia,serif;color:var(--article-accent)}
 
 .layout-wide-left figure:last-child:nth-child(odd),.layout-wide-right figure:last-child:nth-child(odd),.layout-lead-pair figure:last-child:nth-child(even){grid-column:1/-1}
+.export-issues b{display:block;margin-bottom:8px}.export-issues button{display:block;width:100%;padding:6px 0;text-align:left;white-space:normal;font-size:12px;line-height:1.7;text-decoration:underline}.export-issues p,.import-report li{line-height:1.7;margin:6px 0}.import-report{padding-left:20px;font-size:12px;overflow-wrap:anywhere}
+
+/* 图片预览直接使用公众号正文的布局与间距。 */
+.article-block.block-images:has(.image-export-preview){margin:0}.image-export-preview img{max-width:100%}.image-export-preview table{border:0}
