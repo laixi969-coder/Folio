@@ -16,7 +16,6 @@
     "@huggingface/transformers": "^4.3.2",
     "dompurify": "^3.3.0",
     "express": "^5.1.0",
-    "html2canvas": "^1.4.1",
     "lucide-react": "^0.468.0",
     "mammoth": "^1.11.0",
     "marked": "^18.1.2",

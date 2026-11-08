@@ -1,6 +1,6 @@
 import {ARTICLE_FONTS} from '../public/article-fonts.js';
-import {wechatFontMode} from './wechat-font-export';
 import { safeSrc, textOf, embeddedImageSources } from './model';
+// WeChat never receives rasterized text: exports stay editable; bundled fonts may fall back to system fonts on reader devices.
 
 // Media URLs are immutable; only new image sources need loading on a later check.
 const imageReaders=new WeakMap();
@@ -23,7 +23,7 @@ export async function prepareExport(article, fetchImage = fetch, readImage) {
     issues.push({ level: 'blocking', message: '正文为空，请先添加内容。' });
   }
   const webFonts=ARTICLE_FONTS.filter(f=>f.file&&(article.style?.fontFamily===f.id||article.blocks.some(b=>b.html?.includes(f.face))));
-  if(webFonts.length){const mode=wechatFontMode(article);issues.push({level:'warning',message:mode==='all'?`使用了内置字体（${webFonts.map(f=>f.name).join('、')}）。将逐段生成高清文字图片，字形不依赖读者安装字体；微信中无法选字复制、调整字号或点击原文链接。请先预览公众号字体效果。`:mode==='headings'?'章题将转为高清图片保留字体；正文仍可编辑，其中的特殊字体可能被微信替换。':`使用了内置字体（${webFonts.map(f=>f.name).join('、')}）。当前保留可编辑文字，公众号不携带字体文件，读者设备可能回退为系统字体。`})}
+  if(webFonts.length)issues.push({level:'warning',message:`使用了内置字体（${webFonts.map(f=>f.name).join('、')}）。复制与同步保留可编辑图文，公众号不携带字体文件，读者设备可能回退为系统字体。`});
   let group = 0;
   for (const block of article.blocks) {
     if (block.type !== 'images' && !embeddedImageSources(block.html).length) continue;

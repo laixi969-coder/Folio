@@ -29,7 +29,7 @@ describe('文章字体',()=>{
   await waitFor(()=>expect(screen.getByRole('status').textContent).toContain('字体已载入'));
   expect(load).toHaveBeenCalledWith('16px "Noto Sans SC"','文字排版');
   expect(screen.getByRole('link',{name:'查看授权'}).getAttribute('href')).toBe('/fonts/noto-sans-sc/OFL.txt');
-  expect(screen.getByText(/公众号不能直接嵌入/)).toBeTruthy();
+  expect(screen.getByText(/公众号不携带字体文件/)).toBeTruthy();
   fireEvent.change(screen.getByLabelText('文章字体'),{target:{value:'lxgw-wenkai'}});
   expect(change).toHaveBeenLastCalledWith({fontFamily:'lxgw-wenkai'});
   load.mockRejectedValueOnce(Error('offline'));rerender(<ArticleFontPicker style={{fontFamily:'smiley-sans'}} onChange={change}/>);
