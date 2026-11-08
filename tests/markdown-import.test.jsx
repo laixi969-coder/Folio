@@ -11,6 +11,7 @@ it('导入 Markdown 新建文章并可插入现有文章，空文件不修改内
   if(url==='/media/img.png')return {ok:true,blob:async()=>new Blob(['png'],{type:'image/png'})};
   if(url==='/api/media')return {ok:true,json:async()=>({id:'img',src:'/media/img.png',name:'图片',alt:'',caption:'',position:50})};
   if(url==='/api/articles'&&options?.method==='POST'){created=JSON.parse(options.body);return {ok:true,json:async()=>({...created,id:'md-article',revision:1})}};
+  if(url==='/api/articles/md-article/local-vision')return {ok:true,json:async()=>({revision:1,results:[{src:'/media/img.png',width:800,height:600,labels:[{id:'outdoor',confidence:.9}],faces:0,error:false}]})};
   throw Error('unexpected '+url);
  });
  await import('../src/main.jsx');
@@ -20,6 +21,8 @@ it('导入 Markdown 新建文章并可插入现有文章，空文件不修改内
  const photo=new File(['png'], 'photo.png',{type:'image/png'});
  fireEvent.change(fileInput,{target:{files:[file,photo]}});
  await screen.findByText('排版效果');
+ await waitFor(()=>expect(global.fetch.mock.calls.some(([url])=>url==='/api/articles/md-article/local-vision')).toBe(true));
+ await screen.findByText('图片内容分析与排版已完成。');
  expect(created.title).toBe('文章标题');
  expect(created.blocks.map(b=>b.type)).toEqual(['lead','heading','quote','images','paragraph','paragraph']);
  expect(created.blocks[0].html).toContain('<strong>重点</strong>');

@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Folio · 图片版式对照</title><style>
+*{box-sizing:border-box}body{margin:0;background:#eeefeb;color:#26312f;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}header{max-width:920px;margin:auto;padding:52px 28px 20px}header small{letter-spacing:.22em;color:#718782;font-size:11px}header h1{font-size:29px;letter-spacing:-.04em;margin:14px 0 10px}header p{color:#6f7a74;font-size:14px;line-height:1.95;margin:0 0 8px;max-width:760px}header ul{margin:12px 0 0;padding-left:18px;color:#6f7a74;font-size:13px;line-height:2}header li b{color:#33413a;font-weight:600}.wrap{max-width:920px;margin:auto;padding:10px 28px 70px}.item{margin:0 0 40px}.tag{display:flex;align-items:baseline;gap:11px;margin:0 0 12px}.tag span{font:italic 15px Georgia,serif;color:#8ca39b}.tag h2{font-size:15px;margin:0;font-weight:600}.tag p{font-size:11.5px;color:#87908b;margin:0}.spec{background:#fffefa;box-shadow:0 12px 35px #40564b12;padding:32px 34px}.spec .deck-note{font-size:11px;letter-spacing:.18em;color:#8ca39b;margin:0 0 15px}.body{font-size:16px;line-height:1.98;color:#282d2a;margin:0 0 24px}.body:last-child{margin-bottom:0}.strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.strip figure{margin:0}.strip figcaption{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.06em;color:#7b8780;margin-top:7px}.strip img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}footer{max-width:920px;margin:auto;padding:0 28px 60px;font-size:12px;color:#8b958d;line-height:1.9}
+</style></head><body>
+<header><small>FOLIO / FIGURE STUDY</small><h1>图片版式，换一套排法</h1><p>参考归藏图文卡片（guizang-social-card-skill）里关于图片的处理规则，落到公众号长文能用的内联结构上。下面每一块都由 Folio 导出时的同一个渲染函数生成，不是另画的样稿。</p><ul><li><b>截图包壳</b>：截图不再裸奔，纸色底 + 发丝线 + 内边距，边界清楚。</li><li><b>图版标记</b>：FIG. 编号放在图上方，文字永远不压照片（对应其「文字压图 + 主体避让」的降级做法）。</li><li><b>图文并置</b>：58/42 分栏，说明移到右侧，对应杂志 col-2 recipe。</li><li><b>主体位置</b>：裁切时按主体所在位置选 25 / 50 / 75，避免人脸被切断。</li></ul></header>
+<div class="wrap" id="wrap"></div>
+<footer>样稿仅用于比较，不修改任何文章或已保存的风格。编辑器右侧「图片设计」里可选这四种新排法。</footer>
+<script>const fail=m=>{const w=document.getElementById('wrap');if(w&&!w.children.length)w.innerHTML='<p style="color:#9b392f;font-size:13px">载入失败：'+m+'</p>'};window.addEventListener('error',e=>fail(e.message));window.addEventListener('unhandledrejection',e=>fail(e.reason&&e.reason.message||e.reason));</script>
+<script type="module">
+import {renderImageGroup} from '/figure-layout.js';
+const base={preset:'magazine',headingSeries:'editorial',paletteId:'celadon',fontSize:16,lineHeight:1.98,paragraphGap:24,sidePadding:30,imageGap:34,titleSize:31,subtitleSize:15,accent:'#426B64'};
+const shot='/magazine/assets/lane.png',ui='/image-layout-preview/shot-ui.png';
+const assets={};
+async function prepare(src,key,max=1400){const r=await fetch(src);const blob=await r.blob();const bmp=await createImageBitmap(blob);const scale=Math.min(1,max/bmp.width);const c=document.createElement('canvas');c.width=Math.round(bmp.width*scale);c.height=Math.round(bmp.height*scale);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);assets[key]=c.toDataURL('image/jpeg',.86)}
+await Promise.all([prepare(shot,'/media/photo.jpg'),prepare(ui,'/media/ui.jpg',1600)]);
+const block=(treat,{src='/media/photo.jpg',caption='',note='',layout='vertical',gap=0,ratio='original'}={})=>({id:treat,type:'images',images:[{id:treat+'1',src,name:'配图',alt:'配图',caption}],caption:note,layout,gap,ratio,treatment:treat});
+const items=[
+ {n:'01',name:'截图 · 纸底包壳',hint:'frame · 纸色底 + 1px 发丝线 + 22px 内边距',html:renderImageGroup(block('frame',{src:'/media/ui.jpg',note:'简序的编辑界面。截图放进纸色底，边界不再和正文糊在一起。',caption:'简序编辑界面 ｜ 截图'}),base,{assets})},
+ {n:'02',name:'截图 · 浏览器框',hint:'browser · 窗控点 + CAPTURE 标记 + 18px 内边距',html:renderImageGroup(block('browser',{src:'/media/ui.jpg',note:'需要强调"这是一张网页或软件截图"时，用浏览器框。',caption:'桌面端文稿视图 ｜ 截图'}),base,{assets})},
+ {n:'03',name:'图版标记 FIG.',hint:'lede · 编号在图上方，文字不压照片',html:renderImageGroup(block('lede',{note:'编号跟着图走，图注留在图下。文字和照片各占一处，谁也不压谁。',caption:'巷口那道老门 ｜ 摄影：作者'}),base,{assets})},
+ {n:'04',name:'图文并置',hint:'split · 58/42 分栏，说明移到右栏',html:renderImageGroup(block('split',{note:'照片占左边近六成，说明退到右栏。适合一段话讲不清、又不想堆在图下的情况。',caption:'这条街的午后 ｜ 摄影：作者'}),base,{assets})},
+ {n:'05',name:'原比例 · 对照基线',hint:'plain · 原来的排法',html:renderImageGroup(block('plain',{note:'原来的排法：图满宽，说明接在图下。新增版式与它的区别就是"图与字的关系"。',caption:'这条街的午后 ｜ 摄影：作者'}),base,{assets})}
+];
+const wrap=document.getElementById('wrap');
+for(const it of items){
+ const el=document.createElement('section');el.className='item';
+ el.id='item-'+it.n;
+ el.innerHTML=`<div class="tag"><span>${it.n}</span><h2>${it.name}</h2><p>${it.hint}</p></div><div class="spec"><p class="deck-note">正文 16PX · 青瓷纸白</p><p class="body">以前经过这条街，我总是低着头看手机。导航告诉我还剩几分钟，却很少让我知道，自己正经过什么。</p>${it.html}<p class="body">那天没有着急回的消息，我坐下来，听老板讲起这条街的变化。</p></div>`;
+ wrap.appendChild(el);
+}
+// Subject-aware cropping: same photo, three object-positions.
+const strip=document.createElement('section');strip.className='item';
+strip.innerHTML=`<div class="tag"><span>06</span><h2>主体位置</h2><p>object-position 25 / 50 / 75，16:9 裁切</p></div><div class="spec"><p class="deck-note">同一张图 · 三种裁切重心</p><div class="strip">${[['25','主体偏上'],['50','居中'],['75','主体偏下']].map(([p,label])=>`<figure><img src="${assets['/media/photo.jpg']}" style="object-position:center ${p}%" alt=""><figcaption>center ${p}% · ${label}</figcaption></figure>`).join('')}</div></div>`;
+wrap.appendChild(strip);
+if(location.hash)setTimeout(()=>document.getElementById(location.hash.slice(1))?.scrollIntoView({block:'start'}),60);
+</script></body></html>

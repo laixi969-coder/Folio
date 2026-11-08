@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Folio · 章节版式</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f2f3f0;color:#26312f;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}header{max-width:1240px;margin:auto;padding:52px 30px 26px}header small{letter-spacing:.24em;color:#7c8a81;font-size:10px}header h1{font-size:26px;letter-spacing:-.03em;margin:16px 0 12px;font-weight:600}header p{color:#78837c;font-size:13px;line-height:2;margin:0;max-width:680px}.grid{max-width:1240px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 28px;padding:8px 30px 70px}.case{min-width:0}.label{margin:0 0 14px}.label h2{font-size:14px;margin:0 0 5px;font-weight:600}.label p{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;line-height:1.9;color:#8b968f;margin:0;letter-spacing:.02em}.phone{width:375px;max-width:100%;margin:0 auto;background:#fff;padding:30px 26px 32px;box-shadow:0 2px 18px rgba(38,49,47,.06);overflow:hidden}.title{font-family:"Songti SC","STSong",serif;font-size:25px;line-height:1.45;letter-spacing:-.02em;margin:0 0 22px;color:#20261f}.para{font-size:16px;line-height:1.95;color:#333;margin:0}.photo{display:block;width:100%;height:auto;margin:0}.note{font-size:11px;color:#8e9a92;line-height:1.9;margin:12px auto 0;max-width:375px}
+@media(max-width:900px){.grid{grid-template-columns:1fr;padding-left:20px;padding-right:20px}header{padding-left:20px;padding-right:20px}}
+</style></head><body>
+<header><small>FOLIO / CHAPTER STUDY</small><h1>章节标题，不同的阅读节奏</h1><p>居左与居中的色点章序，以及书刊、宋体留白框和松烟侧线。预览使用文章实际导出的标题样式，选中后会统一应用到整篇文章。</p></header>
+<section style="max-width:1240px;margin:0 auto 24px;padding:0 30px;display:flex;flex-wrap:wrap;gap:18px;font-size:13px;"><label>标题长度 <select id="title-kind"><option value="short">短标题</option><option value="long" selected>长标题</option><option value="extra">超长标题</option><option value="english">英文长单词</option></select></label><label>手机宽度 <select id="phone-width"><option>320</option><option selected>375</option><option>414</option></select></label></section>
+<main class="grid" id="grid"></main>
+<script type="module">
+import {seriesHeadingHTML} from '/heading-series.js';
+import {subtitleHTML} from '/subtitle-series.js';
+import {applyArticleSeries} from '/article-series.js';
+import {articlePalette} from '/article-palettes.js';
+const base={preset:'magazine',paletteId:'ochre',fontSize:16,subtitleSize:15,headingSize:19,accent:'#786337'};
+const para='“一到弥勒就快乐。”这句写在文旅口号里的话，我起初只当是寻常宣传。直到走进这座小城，才明白「快乐」二字，在这里是具象的。';
+const deck='有些值得记住的时刻，就藏在那些不赶时间的日子里。';
+const items=[
+ ['serif-slash','宋体留白框','细边大框，框内留白，宋体章题','reference-serif'],
+ ['accent-left','居左色点','大章号与短线左对齐，长标题适度收小','reference-accent-left'],
+ ['accent-dot','色点章序 · 居中','大章号与居中标题，适度留白','reference-accent'],
+ ['bookish','书刊章题','小号章序，细线留白','book-ivory'],
+ ['side','松烟侧线','细竖线与小章号，左对齐标题','teal-side']
+];
+const samples={short:'慢一点，才看得见',long:'金钟的一次见面，和一份4.5亿港元的担保',extra:'关于一份长期家族安排的多个细节：受托人、受益人与管理人的责任究竟如何划分',english:'AnExtremelyLongEnglishChapterTitleWithoutSpacesForMobileReading'};
+const grid=document.getElementById('grid');
+function render(){
+ grid.replaceChildren();
+ for(const [id,name,spec,series] of items){
+  const style=applyArticleSeries({...base,headingSize:23},series),palette=articlePalette(style);
+  const el=document.createElement('section');el.className='case';el.id='case-'+id;
+  el.innerHTML=`<div class="label"><h2>${name}</h2><p>${spec}</p></div><div class="phone" style="width:${document.getElementById('phone-width').value}px;background:${palette.paper};color:${palette.ink};"><p class="para">${para}</p>${seriesHeadingHTML(style,'01',samples[document.getElementById('title-kind').value])}<p class="para">好的章节标题，让读者看清结构，也给正文留下从容的阅读空间。</p></div><p class="note">编辑预览和复制正文共用同一份内联样式。</p>`;
+  grid.appendChild(el);
+ }
+}
+document.getElementById('title-kind').addEventListener('change',render);
+document.getElementById('phone-width').addEventListener('change',render);
+render();
+if(location.hash)setTimeout(()=>document.getElementById(location.hash.slice(1))?.scrollIntoView({block:'start'}),60);
+</script></body></html>

@@ -1,0 +1,6 @@
+/* Unmodified upstream fonts, distributed with each family's SIL OFL 1.1. */
+@font-face{font-family:'Noto Sans SC';src:url('/fonts/noto-sans-sc/font.ttf') format('truetype');font-style:normal;font-weight:100 900;font-display:swap}
+@font-face{font-family:'Noto Serif SC';src:url('/fonts/noto-serif-sc/font.ttf') format('truetype');font-style:normal;font-weight:200 900;font-display:swap}
+@font-face{font-family:'LXGW WenKai';src:url('/fonts/lxgw-wenkai/font.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'Smiley Sans';src:url('/fonts/smiley-sans/font.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'ZCOOL XiaoWei';src:url('/fonts/zcool-xiaowei/font.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}

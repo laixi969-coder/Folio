@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>五款免费字体 · Folio</title>
+<link rel="stylesheet" href="/fonts/fonts.css"/>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f1ea;color:#302d28;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif}main{max-width:1120px;margin:auto;padding:48px 28px}header{margin-bottom:36px}header p{max-width:760px;line-height:1.9;color:#655e54}h1{font-size:2rem;font-weight:600;margin:12px 0}a{color:#74603e;text-underline-offset:4px}.eyebrow{font-size:.75rem;letter-spacing:.16em}.samples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.sample{background:#fffdf8;padding:28px;min-width:0;border:1px solid #ded8cc}.label{display:flex;justify-content:space-between;gap:12px;margin-bottom:24px;color:#74603e;font-size:.875rem}.specimen h2{font-size:1.5rem;line-height:1.65;margin:0 0 18px;overflow-wrap:anywhere}.specimen p{font-size:1rem;line-height:1.95;margin:12px 0;overflow-wrap:anywhere}.meta{border-top:1px solid #e5dfd3;margin-top:24px;padding-top:14px;font-size:.8125rem;line-height:1.8;color:#655e54}.meta p{margin:6px 0}.font-status{font-size:.75rem}footer{font-size:.875rem;margin-top:28px;line-height:1.9;color:#655e54}@media(max-width:700px){main{padding:28px 18px}.samples{grid-template-columns:1fr}.sample{padding:24px}}
+</style>
+</head>
+<body><main><header><a href="/">← 返回 Folio</a><p class="eyebrow">FOLIO · TYPE STUDY</p><h1>让文字，有自己的气质。</h1><p>五款字体均随 Folio 内置，无需安装。正文优先选 Noto 黑体、Noto 宋体或霞鹜文楷；得意黑和站酷小薇更适合短标题。建议一篇文章搭配不超过两款。</p></header><div class="samples" id="samples"></div><footer>五款均按 SIL OFL 1.1 免费用于商业项目，请保留授权声明。公众号可编辑文字不会携带字体文件。若要保留字形，请在 Folio 导出中选择「逐段高清图」或「章题高清图」；转图后不能直接选字或调整阅读字号，微信端请以实际预览为准。</footer></main>
+<script type="module">
+import {ARTICLE_FONTS} from '/article-fonts.js';
+for(const font of ARTICLE_FONTS.filter(f=>f.file)){
+ const card=document.createElement('section');card.className='sample';card.dataset.font=font.id;
+ const label=document.createElement('div');label.className='label';label.innerHTML=`<strong>${font.name}</strong><span class="font-status" role="status">正在载入…</span>`;
+ const specimen=document.createElement('div');specimen.className='specimen';specimen.style.fontFamily=font.family;
+ specimen.innerHTML='<h2>山川与日常，<br/>把生活写成自己的篇章</h2><p>午后，阳光落在书页上。读一段文字，留一点空白，让每一个普通的日子都有回响。</p><p>Aa · 0123456789 · 4.5亿港元</p>';
+ const meta=document.createElement('div');meta.className='meta';meta.innerHTML=`<p>${font.usage}</p><a href="${font.license}" target="_blank" rel="noreferrer">SIL OFL 1.1 授权</a> · <a href="${font.source}" target="_blank" rel="noreferrer">官方来源</a>`;
+ card.append(label,specimen,meta);document.querySelector('#samples').append(card);
+ document.fonts.load(`16px "${font.face}"`,'文字排版').then(faces=>{label.querySelector('.font-status').textContent=faces.length?'已载入':'载入失败'}).catch(()=>{label.querySelector('.font-status').textContent='载入失败'});
+}
+</script></body></html>

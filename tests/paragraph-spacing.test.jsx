@@ -1,0 +1,30 @@
+import React from 'react';
+import {it,expect,vi} from 'vitest';
+import {screen,fireEvent,waitFor} from '@testing-library/react';
+import {newArticle,blockTypography,normalizeStyle,exportHTML} from '../src/model';
+import {referenceBlockIds,applyParagraphSpacing} from '../src/paragraph-spacing';
+const p=(id,html)=>({id,type:'paragraph',html});
+it('参考资料选择在发布配套前停止，局部间距支持零段距并保留导出与其他正文',()=>{
+ const a=newArticle();a.blocks=[p('body','正文'),p('title','参考资料'),p('a','资料<strong>一</strong>'),p('b','资料二'),p('end','发布配套'),p('summary','分享摘要')];
+ expect(referenceBlockIds(a.blocks)).toEqual(['a','b']);
+ const next=applyParagraphSpacing(a,['a','b'],{lineHeight:1.2,paragraphGap:0});
+ expect(next.blocks[0]).toBe(a.blocks[0]);expect(next.blocks[2].html).toBe(a.blocks[2].html);
+ expect(blockTypography(next.blocks[2],normalizeStyle(a.style))).toContain('line-height:1.2;');
+ const doc=document.createElement('div');doc.innerHTML=exportHTML(next);const paras=doc.querySelectorAll('p');
+ expect(paras[2].style.lineHeight).toBe('1.2');expect(paras[2].style.marginBottom).toBe('0px');expect(paras[0].style.marginBottom).toBe('24px');
+ const reset=applyParagraphSpacing(next,['a'],{lineHeight:null,paragraphGap:null});expect(reset.blocks[2].spacing).toEqual({});expect(reset.blocks[3].spacing.paragraphGap).toBe(0);
+ expect(applyParagraphSpacing(a,['a'],{lineHeight:0,paragraphGap:-1}).blocks[2].spacing).toEqual({});
+});
+it('全选、参考资料选择、局部调整、撤销和恢复全文间距可用',async()=>{
+ window.scrollTo=vi.fn();document.body.innerHTML='<div id="root"></div>';
+ const a={...newArticle(),id:'spacing',revision:1,blocks:[p('body','正文'),p('title','参考资料'),p('a','资料一'),p('b','资料二'),p('end','发布配套')]};
+ global.fetch=vi.fn(async(url,options)=>({ok:true,json:async()=>url==='/api/articles'&&!options?.method?{articles:[{...a,wordCount:12}],defaultStyle:null}:options?.method==='PUT'?{...JSON.parse(options.body),revision:2}:a}));
+ await import('../src/main.jsx');fireEvent.click(await screen.findByRole('button',{name:/未命名文章/}));
+ fireEvent.click(await screen.findByRole('button',{name:'选择参考资料'}));
+ expect(screen.getByText('已选择 2 段文字')).toBeTruthy();
+ fireEvent.change(screen.getByLabelText('局部行距'),{target:{value:'1.25'}});fireEvent.change(screen.getByLabelText('局部段距'),{target:{value:'0'}});fireEvent.click(screen.getByRole('button',{name:'应用间距'}));
+ const b=document.querySelector('[data-block-id="a"]');expect(b.style.lineHeight).toBe('1.25');expect(b.style.marginBottom).toBe('0px');expect(document.querySelector('[data-block-id="body"]').style.marginBottom).toBe('24px');
+ fireEvent.click(screen.getAllByRole('button',{name:'撤销'})[0]);await waitFor(()=>expect(b.style.marginBottom).toBe('24px'));
+ fireEvent.click(screen.getByRole('button',{name:'应用间距'}));fireEvent.click(screen.getByRole('button',{name:'恢复全文间距'}));expect(b.style.marginBottom).toBe('24px');
+ fireEvent.click(screen.getByRole('button',{name:'全选文字段落'}));expect(screen.getByText('已选择 5 段文字')).toBeTruthy();fireEvent.click(screen.getByRole('button',{name:'清空选择'}));expect(screen.getByRole('button',{name:'应用间距'}).disabled).toBe(true);
+});

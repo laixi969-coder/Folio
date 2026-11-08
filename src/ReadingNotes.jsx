@@ -1,0 +1,13 @@
+import React, {useState} from 'react';
+import {uid,textOf} from './model';
+
+export default function ReadingNotes({article,onChange,onLocate,initialBlockId}) {
+  const [blockId,setBlockId]=useState(initialBlockId||article.blocks[0]?.id||''),[body,setBody]=useState('');
+  const notes=article.readingNotes||[];
+  const update=(id,patch)=>onChange(a=>({...a,readingNotes:(a.readingNotes||[]).map(n=>n.id===id?{...n,...patch}:n)}));
+  return <div><p className="desk-intro">手机通读时留下修改点，回到编辑器逐条处理。备注不会出现在导出的正文中。</p>
+    <div className="desk-card"><label className="field">标记位置<select value={blockId} onChange={e=>setBlockId(e.target.value)}>{article.blocks.map((b,i)=><option key={b.id} value={b.id}>{i+1}. {b.type==='images'?'图片组':textOf(b.html).slice(0,35)||'空段落'}</option>)}</select></label><label className="field">修改备注<textarea value={body} maxLength={2000} placeholder="例如：这里的转折不够清楚，补一句说明。" onChange={e=>setBody(e.target.value)}/></label><button className="button primary" disabled={!body.trim()||!article.blocks.some(b=>b.id===blockId)} onClick={()=>{const block=article.blocks.find(b=>b.id===blockId);onChange(a=>({...a,readingNotes:[...(a.readingNotes||[]),{id:uid(),blockId,quote:textOf(block.html).slice(0,160)||'图片组',body:body.trim(),resolved:false,at:new Date().toISOString()}]}));setBody('')}}>保存通读标记</button></div>
+    {!notes.length&&<p>还没有通读标记。也可以在预览中打开「边读边标记」。</p>}
+    {[...notes].sort((a,b)=>Number(a.resolved)-Number(b.resolved)).map(n=>{const exists=article.blocks.some(b=>b.id===n.blockId);return <section className={'desk-card '+(n.resolved?'note-resolved':'')} key={n.id}><div className="desk-row"><strong>{n.resolved?'已处理':'待修改'}</strong><small>{new Date(n.at).toLocaleString('zh-CN')}</small></div><blockquote>{n.quote}</blockquote><label className="field">备注内容<textarea aria-label={'备注 '+n.id} value={n.body} maxLength={2000} onChange={e=>update(n.id,{body:e.target.value})}/></label>{!exists&&<p className="desk-warning">原段落已删除。备注仍保留，可选择新位置。</p>}{!exists&&<label className="field">重新关联段落<select value="" onChange={e=>{const block=article.blocks.find(b=>b.id===e.target.value);if(block)update(n.id,{blockId:block.id,quote:textOf(block.html).slice(0,160)})}}><option value="">选择新位置</option>{article.blocks.map((b,i)=><option key={b.id} value={b.id}>{i+1}. {textOf(b.html).slice(0,25)||'图片组'}</option>)}</select></label>}<div className="button-row"><button className="button" disabled={!exists} onClick={()=>onLocate(n.blockId)}>定位修改</button><button className="button" onClick={()=>update(n.id,{resolved:!n.resolved})}>{n.resolved?'重新打开':'标记已处理'}</button></div></section>})}
+  </div>;
+}

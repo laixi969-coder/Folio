@@ -1,0 +1,73 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Folio · 极简副标题示意</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f1f2ef;color:#26312f;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}header{max-width:1180px;margin:auto;padding:56px 32px 30px}header small{letter-spacing:.24em;color:#7c8a81;font-size:10px}header h1{font-size:26px;letter-spacing:-.03em;margin:16px 0 12px;font-weight:600}header p{color:#78837c;font-size:13px;line-height:2;margin:0;max-width:640px}.grid{max-width:1180px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 30px;padding:6px 32px 70px}.item{min-width:0}.label{display:flex;align-items:baseline;gap:10px;margin:0 0 16px}.label span{font:italic 13px Georgia,serif;color:#93a29a}.label h2{font-size:13px;margin:0;font-weight:600}.label p{font-size:11px;color:#8e9a92;margin:0}.spec{background:#fffefa;padding:42px 40px 38px;box-shadow:0 1px 0 rgba(38,49,47,.04)}.edition{font-size:9px;letter-spacing:.18em;color:#8b9890;border-bottom:1px solid #e9ede8;padding-bottom:12px}.title{font-family:"Songti SC","STSong",serif;font-size:25px;line-height:1.5;letter-spacing:.02em;font-weight:600;margin:36px 0 0;color:#282d2a}.deck{margin:0}.gap{display:block}.chapter{font-family:"Songti SC","STSong",serif;color:#282d2a}.chapter small{font-family:Georgia,serif}.body{font-size:15px;line-height:2.05;color:#4b5651;margin:0 0 18px}.body:last-child{margin-bottom:0}.note{font-size:11px;color:#8e9a92;line-height:1.9;margin:14px 0 0}
+
+/* 01 素题：只有字号、字距、留白，没有任何图形。 */
+.s-quiet .deck{margin-top:24px;font-size:14px;line-height:2.05;letter-spacing:.05em;color:#6b7570}
+.s-quiet .gap{height:46px}
+.s-quiet .chapter{margin:0 0 24px;font-size:19px;letter-spacing:.02em}
+.s-quiet .chapter small{display:none}
+
+/* 02 一线：一根发丝线，其余交给留白。 */
+.s-hairline .deck{margin-top:30px;padding-top:24px;border-top:1px solid #dbe2dc;font-size:14px;line-height:2.05;color:#6b7570}
+.s-hairline .gap{height:44px}
+.s-hairline .chapter{margin:0 0 22px;padding-top:20px;border-top:1px solid #dbe2dc;font-size:18px}
+.s-hairline .chapter small{display:block;font-size:10px;letter-spacing:.2em;color:#9aa79f;margin:0 0 12px}
+
+/* 03 宽字距：靠字距撑开气质，不加任何线。 */
+.s-tracking .deck{margin-top:26px;font-size:13px;line-height:2.2;letter-spacing:.2em;color:#79847e}
+.s-tracking .gap{height:52px}
+.s-tracking .chapter{margin:0 0 26px;font-size:17px;letter-spacing:.16em;font-weight:500}
+.s-tracking .chapter small{display:none}
+
+/* 04 退格：整段右移，靠错位而不是装饰。 */
+.s-indent .deck{margin:26px 0 0 2.6em;font-size:14px;line-height:2.05;color:#5f6a64}
+.s-indent .gap{height:48px}
+.s-indent .chapter{margin:0 0 24px 2.6em;font-size:18px}
+.s-indent .chapter small{display:none}
+
+/* 05 一点：一枚 3px 小点，是唯一的图形。 */
+.s-dot .deck:before{content:"";display:block;width:3px;height:3px;background:#426b64;margin:28px 0 22px}
+.s-dot .deck{font-size:14px;line-height:2.05;color:#6b7570}
+.s-dot .gap{height:46px}
+.s-dot .chapter{margin:0 0 24px;font-size:18px}
+.s-dot .chapter:before{content:"";display:block;width:3px;height:3px;background:#426b64;margin:0 0 20px}
+.s-dot .chapter small{display:none}
+
+/* 06 窄栏：把副标题收成一栏，留白让位给版式。 */
+.s-measure .deck{margin-top:26px;width:60%;font-size:14px;line-height:2.1;color:#6b7570}
+.s-measure .gap{height:48px}
+.s-measure .chapter{margin:0 0 24px;width:60%;font-size:18px;line-height:1.7}
+.s-measure .chapter small{display:none}
+
+/* 对照：现在线上的默认款（竖线题记 + 大号章序）。 */
+.s-current .deck{margin-top:26px;padding:2px 0 2px 14px;border-left:3px solid #426b64;font-family:"Songti SC","STSong",serif;font-size:15px;line-height:1.9;letter-spacing:.06em;color:#282d2a}
+.s-current .gap{height:20px}
+.s-current .chapter{display:flex;align-items:flex-end;gap:16px;margin:0 0 26px;font-size:18px}
+.s-current .chapter small{font-size:44px;line-height:.9;letter-spacing:-3px;color:#426b64}
+.s-current .deck-wrap{border-bottom:1px solid #dbe2dc;padding-bottom:18px}
+
+@media(max-width:900px){.grid{grid-template-columns:1fr;padding-left:20px;padding-right:20px}header{padding-left:20px;padding-right:20px}.spec{padding:34px 28px 30px}}
+</style></head><body>
+<header><small>FOLIO / TYPE STUDY</small><h1>副标题，只做留白</h1><p>六款候选，都不加色块、不加英文眉标，靠字号、字距、错位和留白区分。最后一款是现在的默认，放在这里作对照。每款同时给出开篇副标题与章节标题，方便看整篇的气质。</p></header>
+<main class="grid" id="grid"></main>
+<script>
+const deck='有些值得记住的时刻，就藏在那些不赶时间的日子里。';
+const chapter='慢一点，才看得见';
+const body1='以前经过这条街，我总是低着头看手机。导航告诉我还剩几分钟，却很少让我知道，自己正经过什么。';
+const body2='那天没有着急回的消息，我坐下来，听老板讲起这条街的变化。';
+const items=[
+ ['s-quiet','素题','没有图形，只有字号、字距与留白','01','最克制的一款。副标题比正文小一号、浅一度，前后留白不对称。'],
+ ['s-hairline','一线','只有一根发丝线','02','线的颜色极浅，作用是把标题区和正文分开，不做装饰。'],
+ ['s-tracking','宽字距','字距 0.2em，靠节奏而不是图形','03','适合短副标题；字距大，长句会显得松散。'],
+ ['s-indent','退格','整段右移 2.6em','04','靠错位制造版式感，正文仍然顶格。'],
+ ['s-dot','一点','一枚 3px 小点','05','唯一的图形，比竖线轻得多。'],
+ ['s-measure','窄栏','副标题收成 60% 宽','06','用栏宽做版式，留白自然落到右侧。'],
+ ['s-current','对照 · 当前默认','竖线题记 + 大号章序','07','线上正在用的版本，方便直接比较。']
+];
+const grid=document.getElementById('grid');
+for(const [cls,name,hint,num,note] of items){
+ const el=document.createElement('section');el.className='item';
+ el.innerHTML=`<div class="label"><span>${num}</span><h2>${name}</h2><p>${hint}</p></div><div class="spec ${cls}"><div class="edition">简序 · 长文</div><h3 class="title">把日子，过回自己的节奏</h3><div class="deck-wrap"><p class="deck">${deck}</p></div><span class="gap"></span><div class="chapter"><small>01</small>${chapter}</div><p class="body">${body1}</p><p class="body">${body2}</p></div><p class="note">${note}</p>`;
+ grid.appendChild(el);
+}
+</script></body></html>
